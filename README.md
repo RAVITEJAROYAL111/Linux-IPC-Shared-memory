@@ -139,7 +139,8 @@ int main() {
 
 
 ## OUTPUT:
-![Alt text](ex0..6.png) 
+<img width="832" height="185" alt="image" src="https://github.com/user-attachments/assets/e3da7714-644c-4a88-b3a6-8dc58d364533" />
+
 
 
 # RESULT:
