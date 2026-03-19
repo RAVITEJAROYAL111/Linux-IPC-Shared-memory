@@ -1,24 +1,3 @@
-# Linux-IPC-Shared-memory
-Ex06-Linux IPC-Shared-memory
-
-# AIM:
-To Write a C program that illustrates two processes communicating using shared memory.
-
-# DESIGN STEPS:
-
-### Step 1:
-
-Navigate to any Linux environment installed on the system or installed inside a virtual environment like virtual box/vmware or online linux JSLinux (https://bellard.org/jslinux/vm.html?url=alpine-x86.cfg&mem=192) or docker.
-
-### Step 2:
-
-Write the C Program using Linux Process API - Shared Memory
-
-### Step 3:
-
-Execute the C Program for the desired output. 
-
-# PROGRAM:
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,9 +6,8 @@ Execute the C Program for the desired output.
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#define TEXT_SZ 2048   // Shared memory size
+#define TEXT_SZ 2048  // Shared memory size
 
-// Shared structure
 struct shared_use_st {
     int written;
     char some_text[TEXT_SZ];
@@ -43,16 +21,16 @@ int main() {
     // Create shared memory
     shmid = shmget((key_t)1234, sizeof(struct shared_use_st), 0666 | IPC_CREAT);
     if (shmid == -1) {
-        perror("shmget failed");
+        fprintf(stderr, "shmget failed\n");
         exit(EXIT_FAILURE);
     }
 
-    printf("Shared memory ID = %d\n", shmid);
+    printf("Shared memory id = %d\n", shmid);
 
     // Attach shared memory
     shared_memory = shmat(shmid, NULL, 0);
     if (shared_memory == (void *)-1) {
-        perror("shmat failed");
+        fprintf(stderr, "shmat failed\n");
         exit(EXIT_FAILURE);
     }
 
@@ -64,15 +42,15 @@ int main() {
     pid_t pid = fork();
 
     if (pid < 0) {
-        perror("fork failed");
+        fprintf(stderr, "Fork failed\n");
         exit(EXIT_FAILURE);
     }
 
-    // ================= CHILD (CONSUMER) =================
     if (pid == 0) {
+        // 🔹 Child Process (Consumer)
         while (1) {
             while (shared_stuff->written == 0) {
-                sleep(1);   // wait for producer
+                sleep(1);
             }
 
             printf("Consumer received: %s", shared_stuff->some_text);
@@ -84,17 +62,15 @@ int main() {
             shared_stuff->written = 0;
         }
 
-        // Detach memory
+        // Detach shared memory
         if (shmdt(shared_memory) == -1) {
-            perror("shmdt failed");
+            fprintf(stderr, "shmdt failed\n");
             exit(EXIT_FAILURE);
         }
 
         exit(EXIT_SUCCESS);
-    }
-
-    // ================= PARENT (PRODUCER) =================
-    else {
+    } else {
+        // 🔹 Parent Process (Producer)
         char buffer[TEXT_SZ];
 
         while (1) {
@@ -109,38 +85,25 @@ int main() {
             }
 
             while (shared_stuff->written == 1) {
-                sleep(1);   // wait for consumer
+                sleep(1);
             }
         }
 
+        // Wait for child
         wait(NULL);
 
-        // Detach memory
+        // Detach shared memory
         if (shmdt(shared_memory) == -1) {
-            perror("shmdt failed");
+            fprintf(stderr, "shmdt failed\n");
             exit(EXIT_FAILURE);
         }
 
         // Remove shared memory
-        if (shmctl(shmid, IPC_RMID, NULL) == -1) {
-            perror("shmctl failed");
+        if (shmctl(shmid, IPC_RMID, 0) == -1) {
+            fprintf(stderr, "shmctl failed\n");
             exit(EXIT_FAILURE);
         }
 
-        printf("Shared memory removed\n");
         exit(EXIT_SUCCESS);
     }
 }
-
-## Write a C program that illustrates two processes communicating using shared memory.
-
-
-
-
-
-## OUTPUT:
-![Alt text](ex0..6.png) 
-
-
-# RESULT:
-The program is executed successfully.
